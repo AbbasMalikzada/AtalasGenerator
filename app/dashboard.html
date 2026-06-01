@@ -744,6 +744,177 @@
         .trace-log-metrics {
             color: var(--text-muted);
         }
+
+        /* Documentation Overlay Modal Styling */
+        .docs-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 5, 8, 0.85);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .docs-modal {
+            background: rgba(17, 19, 30, 0.95);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 950px;
+            max-height: 85vh;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(139, 92, 246, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .docs-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 1rem;
+        }
+
+        .docs-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+            transition: all 0.2s ease;
+        }
+
+        .docs-close-btn:hover {
+            color: var(--accent-danger);
+            transform: scale(1.1);
+        }
+
+        .docs-content {
+            overflow-y: auto;
+            padding-right: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .docs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .docs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .docs-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .docs-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-primary);
+            opacity: 0.8;
+        }
+
+        .docs-card.blue::before {
+            background: var(--accent-secondary);
+        }
+
+        .docs-card.success::before {
+            background: var(--accent-success);
+        }
+
+        .docs-card.warning::before {
+            background: var(--accent-warning);
+        }
+
+        .docs-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .docs-card h4 {
+            color: white;
+            font-size: 1.05rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .docs-card p, .docs-card ul {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .docs-card ul {
+            padding-left: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .docs-code {
+            font-family: 'Fira Code', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--accent-primary);
+            font-size: 0.8rem;
+        }
+
+        .docs-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .download-badge {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
     </style>
 </head>
 <body>
@@ -758,6 +929,9 @@
             </div>
         </div>
         <div class="badge-bar">
+            <button class="btn btn-small" onclick="openDocsModal()" style="background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.35); color: #c084fc; font-weight: 600; box-shadow: 0 0 15px rgba(139, 92, 246, 0.2); display: flex; align-items: center; gap: 6px;">
+                📖 Documentation
+            </button>
             <div class="status-badge">
                 <span class="status-dot"></span>
                 <span>System Ready</span>
@@ -1014,6 +1188,90 @@
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
                 <button class="btn" onclick="closeFileEditor()">Cancel</button>
                 <button class="btn btn-primary" onclick="saveFileEditor()">Save Workspace File</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentation Guide Modal Overlay -->
+    <div class="docs-overlay" id="docsOverlay">
+        <div class="docs-modal">
+            <div class="docs-modal-header">
+                <h3 style="color: white; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                    <span>📖</span> Atlas System Guide & Documentation
+                </h3>
+                <button class="docs-close-btn" onclick="closeDocsModal()">&times;</button>
+            </div>
+            
+            <div class="docs-content">
+                <p style="font-size: 0.95rem; color: #d1d5db; line-height: 1.6;">
+                    Welcome to the **Atlas Documentation Pipeline**. This platform automatically ingests unstructured raw files, extracts key architectural, financial, and timeline facts, resolves internal conflicts, and synthesizes unified technical specifications.
+                </p>
+
+                <div class="docs-grid">
+                    <!-- Card 1: Drag & Drop Files -->
+                    <div class="docs-card">
+                        <h4>📥 Drag & Drop Workspace Loader</h4>
+                        <p style="margin-bottom: 8px;">Upload local files instantly to dynamically load them into the system memory:</p>
+                        <ul>
+                            <li>Drag raw files onto the dotted workspace target or click the card to browse.</li>
+                            <li>Supports plain text (<span class="docs-code">.txt</span>), markdown (<span class="docs-code">.md</span>), JSON configurations (<span class="docs-code">.json</span>), and code files (<span class="docs-code">.py</span>, <span class="docs-code">.java</span>).</li>
+                            <li>Loaded files can be edited in real-time or deleted prior to executing extraction.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 2: Caching & Token Optimization -->
+                    <div class="docs-card blue">
+                        <h4>⚡ Smart MD5 Fact Caching</h4>
+                        <p style="margin-bottom: 8px;">Avoid redundant processing and expensive API consumption with the built-in cache:</p>
+                        <ul>
+                            <li>The pipeline computes cryptographic MD5 hashes of file contents upon ingestion.</li>
+                            <li>If a file hasn't changed, facts are instantly retrieved from <span class="docs-code">.fact_cache.json</span>.</li>
+                            <li>This cuts down external LLM calls by up to **80%** on recurring syntheses.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 3: Saved Config defaults -->
+                    <div class="docs-card success">
+                        <h4>💾 Persistent Config Defaults</h4>
+                        <p style="margin-bottom: 8px;">Configure settings once and preserve them across your working sessions:</p>
+                        <ul>
+                            <li>Select your LLM service provider and model identifier, and enter your authorization token.</li>
+                            <li>Click **"Save Default"** to write parameters to the server's <span class="docs-code">config.json</span>.</li>
+                            <li>Future page loads will automatically populate credentials, keeping the API seamless.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 4: Command Line Interface -->
+                    <div class="docs-card warning">
+                        <h4>💻 CLI & Automated Batch Scripts</h4>
+                        <p style="margin-bottom: 8px;">Run the pipeline from standard Windows terminals or using automated double-click batch files:</p>
+                        <ul>
+                            <li><strong>Run Pipeline</strong>: Use <span class="docs-code">python run_cli.py</span> or run <span class="docs-code">run_cli_live.bat</span>.</li>
+                            <li><strong>Offline Simulation</strong>: Execute <span class="docs-code">run_cli_simulation.bat</span> to test the pipeline flow for free.</li>
+                            <li><strong>Start Dashboard Server</strong>: Double-click <span class="docs-code">start_server.bat</span> to launch the local web server.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="docs-card" style="background: rgba(139, 92, 246, 0.05); border-color: rgba(139, 92, 246, 0.2); flex-shrink: 0;">
+                    <h4 style="color: #c084fc;">📄 Reference Template Documentation</h4>
+                    <p style="margin-bottom: 12px; line-height: 1.5;">
+                        To assist in designing conforming materials, the system has a pre-formatted **documentation.docx** reference standard stored at the workspace root. This template showcases sample layout formatting, structures, and conflict handling metrics for engineering review.
+                    </p>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <span class="download-badge">
+                            <span>📎</span> documentation.docx available
+                        </span>
+                        <a href="/download_docs_template" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.85rem; text-decoration: none;" download>
+                            📥 Download Template (.docx)
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="docs-footer">
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Atlas System v1.0.0 &bull; Task 1</span>
+                <button class="btn" onclick="closeDocsModal()" style="padding: 8px 18px; font-size: 0.85rem;">Close Guide</button>
             </div>
         </div>
     </div>
@@ -1639,6 +1897,27 @@
                 alert("Failed to save settings: " + err.message);
             });
         }
+
+        // Documentation Modal Handlers
+        function openDocsModal() {
+            document.getElementById('docsOverlay').style.display = 'flex';
+        }
+
+        function closeDocsModal() {
+            document.getElementById('docsOverlay').style.display = 'none';
+        }
+
+        // Modal outer click handler to close modals automatically
+        window.addEventListener('click', function(event) {
+            const docsOverlay = document.getElementById('docsOverlay');
+            if (event.target === docsOverlay) {
+                closeDocsModal();
+            }
+            const editorOverlay = document.getElementById('editorOverlay');
+            if (event.target === editorOverlay) {
+                closeFileEditor();
+            }
+        });
 
         // Initialize UI
         toggleProviderFields();

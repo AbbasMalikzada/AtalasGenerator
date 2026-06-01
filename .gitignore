@@ -1,0 +1,20 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+ENV/
+env/
+
+# Local platform configurations & temporary cache (holds private keys!)
+config.json
+.fact_cache.json
+
+# Office temporary files
+~$*.docx
+
+# OS specific files
+.DS_Store
+Thumbs.db
