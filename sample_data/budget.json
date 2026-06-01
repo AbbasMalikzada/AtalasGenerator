@@ -1,0 +1,9 @@
+{
+  "currency": "USD",
+  "total_budget": 150000,
+  "breakdown": {
+    "infrastructure_cloud": 30000,
+    "licensing_fees": 15000,
+    "labor_cost": 105000
+  }
+}

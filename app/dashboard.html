@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Documentation Generator (Task 1)</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Inline CSS for Rich, Premium Glassmorphism Theme -->
+    <style>
+        :root {
+            --bg-base: #0a0b10;
+            --bg-glass: rgba(18, 20, 32, 0.65);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --accent-primary: #8b5cf6; /* Vibrant Violet */
+            --accent-secondary: #3b82f6; /* Electric Blue */
+            --accent-success: #10b981; /* Emerald Green */
+            --accent-warning: #f59e0b; /* Amber */
+            --accent-danger: #ef4444; /* Rose Red */
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-glow: rgba(139, 92, 246, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+        }
+
+        /* Top Premium Header */
+        header {
+            padding: 2.5rem 5% 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(10, 11, 16, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: white;
+            box-shadow: 0 0 20px var(--text-glow);
+        }
+
+        .logo-text h1 {
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .badge-bar {
+            display: flex;
+            gap: 12px;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-glass);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-success);
+            box-shadow: 0 0 10px var(--accent-success);
+        }
+
+        /* Container Layout */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2.5rem;
+        }
+
+        @media (max-width: 1100px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glassmorphic Panel Wrapper */
+        .glass-panel {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-panel:hover {
+            box-shadow: 0 12px 40px rgba(139, 92, 246, 0.05);
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            color: white;
+            border-left: 4px solid var(--accent-primary);
+            padding-left: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Form Controls & Inputs */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, select:focus, textarea:focus {
+            border-color: var(--accent-primary);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.25);
+        }
+
+        /* Custom Checkbox */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            margin-top: 5px;
+        }
+
+        .checkbox-container input {
+            display: none;
+        }
+
+        .custom-checkmark {
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--border-glass);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            display: inline-block;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-container input:checked + .custom-checkmark {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 10px var(--text-glow);
+        }
+
+        .checkbox-container input:checked + .custom-checkmark::after {
+            content: "";
+            position: absolute;
+            left: 7px;
+            top: 3px;
+            width: 4px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        /* Buttons with Premium Micro-animations */
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid var(--border-glass);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            font-weight: 600;
+            box-shadow: 0 4px 20px var(--text-glow);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.6);
+            filter: brightness(1.1);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        /* File List / Workspace Workspace */
+        .workspace-area {
+            border: 1.5px dashed var(--border-glass);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.01);
+            transition: all 0.3s ease;
+        }
+
+        .workspace-area:hover {
+            border-color: var(--accent-primary);
+            background: rgba(139, 92, 246, 0.02);
+        }
+
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Drag & Drop Dropzone Styling */
+        .dropzone {
+            border: 2px dashed rgba(139, 92, 246, 0.25);
+            border-radius: 16px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.01);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(139, 92, 246, 0.04);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
+            transform: scale(1.01);
+        }
+
+        .file-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .file-info {
+            text-align: left;
+        }
+
+        .file-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .file-ext {
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .file-size {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* File Editor Inline Modal */
+        .editor-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 5, 8, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .editor-modal {
+            background: #11131e;
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Execution Progress Panel */
+        .progress-container {
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            background: rgba(139, 92, 246, 0.04);
+            border: 1px solid rgba(139, 92, 246, 0.15);
+            padding: 1.5rem;
+            border-radius: 16px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-percentage {
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+
+        .progress-bar-outer {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-inner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-steps {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-top: 5px;
+        }
+
+        .progress-step-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step-card.active {
+            opacity: 1;
+            border-color: var(--accent-primary);
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .progress-step-card.done {
+            opacity: 1;
+            border-color: var(--accent-success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        /* Result View & Tab Panel Styling */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 8px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab-btn.active {
+            color: white;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .empty-result-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            gap: 1rem;
+        }
+
+        .empty-result-icon {
+            font-size: 3.5rem;
+            background: linear-gradient(to right, #4b5563, #9ca3af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Beautiful Output Typography */
+        .output-block {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .overview-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 1.5rem;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            border-left: 4px solid var(--accent-secondary);
+        }
+
+        .bullet-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            list-style: none;
+        }
+
+        .bullet-list li {
+            position: relative;
+            padding-left: 24px;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .bullet-list li::before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: var(--accent-primary);
+            font-size: 0.9rem;
+        }
+
+        .bullet-list.risks li::before {
+            content: "⚠️";
+            color: var(--accent-warning);
+        }
+
+        .bullet-list.goals li::before {
+            content: "🎯";
+            color: var(--accent-secondary);
+        }
+
+        .bullet-list.team li::before {
+            content: "👤";
+            color: var(--accent-success);
+        }
+
+        .code-box {
+            background: #090a0f;
+            border: 1px solid var(--border-glass);
+            padding: 1.25rem;
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #d1d5db;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+        }
+
+        /* Metadata & Timings Display */
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .meta-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .meta-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .meta-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .meta-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* Warnings Panel (Conflicts) */
+        .conflict-banner {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-left: 4px solid var(--accent-warning);
+        }
+
+        .conflict-header {
+            font-weight: 600;
+            color: var(--accent-warning);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .conflict-item {
+            font-size: 0.85rem;
+            color: #fde68a;
+            padding-left: 12px;
+            border-left: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        /* Trace Logs */
+        .trace-log-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .trace-log-item {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--border-glass);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .trace-log-step {
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--accent-secondary);
+        }
+        
+        .trace-log-metrics {
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header bar -->
+    <header>
+        <div class="logo-group">
+            <div class="logo-icon">▲</div>
+            <div class="logo-text">
+                <h1>Atlas Generator</h1>
+                <p>Advanced Technical Design Documentation Pipeline</p>
+            </div>
+        </div>
+        <div class="badge-bar">
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span>System Ready</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        
+        <!-- Left Side Panel (Controls) -->
+        <div class="glass-panel">
+            <div class="panel-title">
+                <span>🔧 Configuration & Pipeline Options</span>
+            </div>
+
+            <!-- Workspace Manager -->
+            <div class="input-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <label>Active Workspace Files</label>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-small" onclick="preloadSampleWorkspace()" style="background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: #c084fc;">Preload Sample Data</button>
+                        <button class="btn btn-small" onclick="openFileEditor()">+ Add File</button>
+                    </div>
+                </div>
+                
+                <!-- Stylized Drag & Drop Dropzone -->
+                <div class="dropzone" id="uploadDropzone" onclick="triggerFileInput()">
+                    <span style="font-size: 1.5rem; color: var(--accent-primary); filter: drop-shadow(0 0 5px var(--accent-primary));">📥</span>
+                    <p style="font-weight: 500; font-size: 0.85rem; margin-top: 5px;">Drag & Drop Files Here</p>
+                    <p style="font-size: 0.7rem; color: var(--text-muted);">supports .txt, .md, .json, .py, .java (or click to browse)</p>
+                    <input type="file" id="hiddenFileInput" multiple style="display: none;" onchange="handleFileSelect(event)">
+                </div>
+                
+                <div class="file-list" id="fileListContainer" style="margin-top: 10px;">
+                    <!-- Files will be dynamically populated here -->
+                </div>
+            </div>
+
+            <!-- Provider & API Keys -->
+            <div class="input-group">
+                <label for="llmProvider">LLM Service Model</label>
+                <select id="llmProvider" onchange="toggleProviderFields()">
+                    <option value="fake">Offline Simulation (FakeLLM - Free/No Key)</option>
+                    <option value="openrouter" selected>OpenRouter AI (Any Model)</option>
+                    <option value="gemini">Google Gemini API (Direct)</option>
+                    <option value="anthropic">Anthropic Claude API (Direct)</option>
+                </select>
+            </div>
+
+            <!-- Model Input (Visible for OpenRouter & Direct APIs) -->
+            <div class="input-group" id="modelGroup">
+                <label for="llmModel">Model Identifier</label>
+                <input type="text" id="llmModel" placeholder="e.g. anthropic/claude-3.5-sonnet:beta" value="anthropic/claude-3.5-sonnet:beta">
+            </div>
+
+            <!-- API Keys Container -->
+            <div class="input-group" id="apiKeyGroup">
+                <label id="keyLabel" for="apiKey">API Access Token</label>
+                <input type="text" id="apiKey" placeholder="sk-or-v1-..." value="">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 0.5rem;">
+                <button class="btn btn-primary" onclick="runDocumentPipeline()" style="flex-grow: 1;">
+                    🚀 Execute Extraction & Synthesis
+                </button>
+                <button class="btn" onclick="persistSettingsOnServer()" title="Save Model and API Keys as Server Defaults" style="padding: 12px 16px;">
+                    💾 Save Default
+                </button>
+            </div>
+
+            <!-- Real-time Timing & Progress Bar -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-header">
+                    <span id="progressStatus">Initializing pipeline...</span>
+                    <span class="progress-percentage" id="progressPercentage">0%</span>
+                </div>
+                <div class="progress-bar-outer">
+                    <div class="progress-bar-inner" id="progressBar"></div>
+                </div>
+                <div class="progress-steps">
+                    <div class="progress-step-card" id="stepIngest">
+                        <strong>Ingest</strong>
+                        <span>Normalize files</span>
+                    </div>
+                    <div class="progress-step-card" id="stepExtract">
+                        <strong>Extraction</strong>
+                        <span>Atomic facts</span>
+                    </div>
+                    <div class="progress-step-card" id="stepSynthesize">
+                        <strong>Synthesis</strong>
+                        <span>Generate Doc</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side Panel (Results Viewer) -->
+        <div class="glass-panel" style="gap: 1.75rem;">
+            <div class="panel-title">
+                <span>📋 Generated Technical Documentation</span>
+                <div id="exportButtonGroup" style="display: none; gap: 8px;">
+                    <button class="btn btn-small" onclick="exportAsMarkdown()" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); color: #93c5fd;">💾 Export MD</button>
+                    <button class="btn btn-small" onclick="exportAsJSON()">💾 Export JSON</button>
+                </div>
+            </div>
+
+            <!-- Empty State placeholder -->
+            <div class="empty-result-state" id="emptyResultState">
+                <div class="empty-result-icon">📄</div>
+                <h3>No Documentation Generated Yet</h3>
+                <p>Add notes, budget files, or architecture snippets in the workspace, configure your API parameters, and click "Execute Extraction & Synthesis" to begin.</p>
+            </div>
+
+            <!-- Result Content (Initially Hidden) -->
+            <div id="resultContent" style="display: none; flex-direction: column; gap: 1.5rem;">
+                
+                <!-- Performance Metrics Grid -->
+                <div class="meta-grid">
+                    <div class="meta-card">
+                        <div class="meta-val" id="metaDuration">0ms</div>
+                        <div class="meta-label">Total Duration</div>
+                    </div>
+                    <div class="meta-card">
+                        <div class="meta-val" id="metaCalls">0</div>
+                        <div class="meta-label">LLM Calls</div>
+                    </div>
+                    <div class="meta-card">
+                        <div class="meta-val" id="metaTokens">0</div>
+                        <div class="meta-label">Total Tokens</div>
+                    </div>
+                    <div class="meta-card">
+                        <div class="meta-val" id="metaModel" style="font-size: 0.85rem; padding-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</div>
+                        <div class="meta-label">Model Used</div>
+                    </div>
+                </div>
+
+                <!-- Conflict Logging (Warning Box) -->
+                <div class="conflict-banner" id="conflictBanner" style="display: none;">
+                    <div class="conflict-header">
+                        ⚠️ Pipeline Conflict Resolution Report
+                    </div>
+                    <div id="conflictNotesList" style="display: flex; flex-direction: column; gap: 6px;">
+                        <!-- Conflict details will populate here -->
+                    </div>
+                </div>
+
+                <!-- Tab Header Navigation -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+                    <button class="tab-btn" onclick="switchTab('goals')">Goals</button>
+                    <button class="tab-btn" onclick="switchTab('requirements')">Requirements</button>
+                    <button class="tab-btn" onclick="switchTab('tech')">Technical Solution</button>
+                    <button class="tab-btn" onclick="switchTab('architecture')">Architecture</button>
+                    <button class="tab-btn" onclick="switchTab('team')">Team & Timeline</button>
+                    <button class="tab-btn" onclick="switchTab('budget')">Budget & Risks</button>
+                    <button class="tab-btn" onclick="switchTab('trace')">Execution Trace</button>
+                </div>
+
+                <!-- Tab Content Sections -->
+                <div id="tab-overview" class="tab-content active">
+                    <div class="output-block">
+                        <h3 style="font-size: 1.1rem; color: white;">Project Overview</h3>
+                        <div class="overview-card" id="docOverview">No overview available.</div>
+                    </div>
+                </div>
+
+                <div id="tab-goals" class="tab-content">
+                    <div class="output-block">
+                        <h3 style="font-size: 1.1rem; color: white;">Key Goals</h3>
+                        <ul class="bullet-list goals" id="docGoals"></ul>
+                    </div>
+                </div>
+
+                <div id="tab-requirements" class="tab-content">
+                    <div class="output-block">
+                        <h3 style="font-size: 1.1rem; color: white;">System Requirements</h3>
+                        <ul class="bullet-list" id="docRequirements"></ul>
+                    </div>
+                </div>
+
+                <div id="tab-tech" class="tab-content">
+                    <div class="output-block">
+                        <h3 style="font-size: 1.1rem; color: white;">Technical Solution</h3>
+                        <div class="overview-card" id="docTechSolution" style="border-left-color: var(--accent-primary);">No technical details available.</div>
+                    </div>
+                </div>
+
+                <div id="tab-architecture" class="tab-content">
+                    <div class="output-block">
+                        <h3 style="font-size: 1.1rem; color: white;">System Architecture</h3>
+                        <pre class="code-box" id="docArchitecture"></pre>
+                    </div>
+                </div>
+
+                <div id="tab-team" class="tab-content">
+                    <div class="output-block">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <div>
+                                <h3 style="font-size: 1.1rem; color: white; margin-bottom: 10px;">Engineering Team</h3>
+                                <ul class="bullet-list team" id="docTeam"></ul>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 1.1rem; color: white; margin-bottom: 10px;">Project Timeline</h3>
+                                <div class="overview-card" id="docTimeline" style="border-left-color: var(--accent-success); font-size: 0.9rem;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-budget" class="tab-content">
+                    <div class="output-block">
+                        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem;">
+                            <div>
+                                <h3 style="font-size: 1.1rem; color: white; margin-bottom: 10px;">Risks Identified</h3>
+                                <ul class="bullet-list risks" id="docRisks"></ul>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 1.1rem; color: white; margin-bottom: 10px;">Budget Projections</h3>
+                                <div class="overview-card" id="docBudget" style="border-left-color: var(--accent-warning); font-size: 1rem; font-weight: 500;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-trace" class="tab-content">
+                    <div class="output-block">
+                        <h3 style="font-size: 1.1rem; color: white; margin-bottom: 10px;">Pipeline Trace Steps</h3>
+                        <div class="trace-log-container" id="docTrace"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Interactive Workspace File Modal Editor -->
+    <div class="editor-overlay" id="editorOverlay">
+        <div class="editor-modal">
+            <h3 style="color: white; font-size: 1.2rem; border-left: 4px solid var(--accent-primary); padding-left: 10px;" id="editorTitle">Add Workspace File</h3>
+            <input type="hidden" id="editorFileIndex" value="-1">
+            
+            <div class="input-group">
+                <label for="editorFileName">Filename (including format, e.g. brief.md, budget.json, notes.txt)</label>
+                <input type="text" id="editorFileName" placeholder="Enter name...">
+            </div>
+
+            <div class="input-group" style="flex-grow: 1;">
+                <label for="editorFileContent">Raw File Contents</label>
+                <textarea id="editorFileContent" rows="12" style="font-family: 'Fira Code', monospace; font-size: 0.85rem;" placeholder="Type file content here..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                <button class="btn" onclick="closeFileEditor()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveFileEditor()">Save Workspace File</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client-Side JavaScript Logic -->
+    <script>
+        // Loaded Workspace Files Array
+        let workspaceFiles = [];
+        let currentDoc = null;
+        let currentFullResponse = null;
+
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        // Toggle UI field constraints based on selected provider
+        function toggleProviderFields() {
+            const provider = document.getElementById('llmProvider').value;
+            const modelGroup = document.getElementById('modelGroup');
+            const apiKeyGroup = document.getElementById('apiKeyGroup');
+            const keyLabel = document.getElementById('keyLabel');
+            const apiKey = document.getElementById('apiKey');
+            const modelInput = document.getElementById('llmModel');
+
+            if (provider === 'fake') {
+                modelGroup.style.display = 'none';
+                apiKeyGroup.style.display = 'none';
+            } else if (provider === 'openrouter') {
+                modelGroup.style.display = 'flex';
+                apiKeyGroup.style.display = 'flex';
+                keyLabel.innerText = "OpenRouter Access Token";
+                apiKey.placeholder = "sk-or-v1-...";
+                if (!modelInput.value.includes('/')) {
+                    modelInput.value = "anthropic/claude-3.5-sonnet:beta";
+                }
+            } else if (provider === 'gemini') {
+                modelGroup.style.display = 'flex';
+                apiKeyGroup.style.display = 'flex';
+                keyLabel.innerText = "Google Gemini API Key";
+                apiKey.placeholder = "AIzaSy...";
+                modelInput.value = "gemini-2.5-flash";
+            } else if (provider === 'anthropic') {
+                modelGroup.style.display = 'flex';
+                apiKeyGroup.style.display = 'flex';
+                keyLabel.innerText = "Anthropic API Key";
+                apiKey.placeholder = "sk-ant-...";
+                modelInput.value = "claude-3-5-sonnet-20241022";
+            }
+        }
+
+        // Add preloaded sample dataset to let user test immediately
+        function preloadSampleWorkspace() {
+            workspaceFiles = [
+                {
+                    name: "project_brief.md",
+                    content: `# Project Atlas Brief\n\n## Project Overview\nProject Atlas is a next-generation automated logistics platform aimed at reducing supply chain latency. The platform integrates real-time route optimization algorithms to streamline delivery scheduling.\n\n## Goals\n- Reduce delivery times by 25% across regional distribution centers.\n- Implement an automated dispatching agent using advanced search heuristics.\n- Ensure 99.9% uptime for the API gateway.\n\n## Timeline\nThe complete development phase is estimated to take **8 weeks** starting from June 1st, 2026.\n\n## Team\n- **Alice Smith**: Project Manager & Lead Coordinator\n- **Bob Johnson**: Principal Backend Engineer\n- **Charlie Brown**: Senior Frontend Engineer`
+                },
+                {
+                    name: "budget.json",
+                    content: `{\n  "currency": "USD",\n  "total_budget": 150000,\n  "breakdown": {\n    "infrastructure_cloud": 30000,\n    "licensing_fees": 15000,\n    "labor_cost": 105000\n  }\n}`
+                },
+                {
+                    name: "engineering_notes.txt",
+                    content: `Engineering Notes - Project Atlas Architecture\n\nTechnical Solution:\nWe will deploy a microservices architecture utilizing FastAPI for API services and PostgreSQL for transactional storage. Redis will be employed for distributed caching of optimal routes.\n\nArchitecture details:\n- API Gateway: Configured using Nginx to handle routing and TLS termination.\n- Backend Services: Built on Python 3.11 with FastAPI.\n- Database Layer: PostgreSQL replication with pgpool-II for load balancing.\n- Messaging: RabbitMQ for asynchronous event propagation between routing and tracking services.\n\nRisks identified:\n- Data consistency lag between regional databases.\n- Integration issues with third-party legacy routing systems.\n- High network latency in rural regional warehouses.`
+                },
+                {
+                    name: "meeting_notes.md",
+                    content: `# Meeting Notes - May 28, 2026\n\n## Project Overview Update\nThe team aligned on the development workflow for Project Atlas. The primary objective remains optimizing route scheduling to lower delivery latencies.\n\n## Goals Confirmed\n- Reduce delivery times by 25% (very high priority).\n- Achieve 99.9% uptime for the critical API gateway.\n\n## Timeline Conflict\nWe discussed extensions due to onboarding delays. The team proposed extending the schedule to **10 weeks** instead of the original 8-week plan.\n\n## Budget Discrepancy\nAn alternative financial plan was reviewed suggesting a lower budget cap of **$120,000** to present to the steering committee.\n\n## Additional Team\n- **David Miller**: Joining as Senior QA Engineer to verify dispatch API test coverage.`
+                }
+            ];
+            renderFileList();
+        }
+
+        // Workspace files renderer
+        function renderFileList() {
+            const container = document.getElementById('fileListContainer');
+            if (workspaceFiles.length === 0) {
+                container.innerHTML = `
+                    <div class="workspace-area">
+                        <span style="font-size: 1.8rem; color: var(--text-muted);">📂</span>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">No source materials in workspace</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = workspaceFiles.map((file, idx) => {
+                const ext = file.name.split('.').pop();
+                return `
+                    <div class="file-card">
+                        <div class="file-info">
+                            <div class="file-name">
+                                <span class="file-ext">${ext}</span>
+                                <span>${escapeHtml(file.name)}</span>
+                            </div>
+                            <div class="file-size">${file.content.length} characters</div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn btn-small" onclick="openFileEditor(${idx})">Edit</button>
+                            <button class="btn btn-small btn-danger" onclick="removeFile(${idx})">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function removeFile(idx) {
+            workspaceFiles.splice(idx, 1);
+            renderFileList();
+        }
+
+        // Editor Dialog Handlers
+        function openFileEditor(idx = -1) {
+            const overlay = document.getElementById('editorOverlay');
+            const title = document.getElementById('editorTitle');
+            const fileIdxInput = document.getElementById('editorFileIndex');
+            const nameInput = document.getElementById('editorFileName');
+            const contentInput = document.getElementById('editorFileContent');
+
+            if (idx === -1) {
+                title.innerText = "Add Workspace File";
+                fileIdxInput.value = "-1";
+                nameInput.value = "";
+                contentInput.value = "";
+            } else {
+                title.innerText = "Edit Workspace File";
+                fileIdxInput.value = idx.toString();
+                nameInput.value = workspaceFiles[idx].name;
+                contentInput.value = workspaceFiles[idx].content;
+            }
+            overlay.style.display = 'flex';
+        }
+
+        function closeFileEditor() {
+            document.getElementById('editorOverlay').style.display = 'none';
+        }
+
+        function saveFileEditor() {
+            const idx = parseInt(document.getElementById('editorFileIndex').value);
+            const name = document.getElementById('editorFileName').value.trim();
+            const content = document.getElementById('editorFileContent').value;
+
+            if (!name) {
+                alert("Filename is required!");
+                return;
+            }
+
+            if (idx === -1) {
+                workspaceFiles.push({ name, content });
+            } else {
+                workspaceFiles[idx] = { name, content };
+            }
+
+            closeFileEditor();
+            renderFileList();
+        }
+
+        // Execute Generation Pipeline
+        function runDocumentPipeline() {
+            if (workspaceFiles.length === 0) {
+                alert("Please add at least one source file or preload the sample dataset first!");
+                return;
+            }
+
+            const provider = document.getElementById('llmProvider').value;
+            const model = document.getElementById('llmModel').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentage = document.getElementById('progressPercentage');
+            const progressStatus = document.getElementById('progressStatus');
+            
+            const stepIngest = document.getElementById('stepIngest');
+            const stepExtract = document.getElementById('stepExtract');
+            const stepSynthesize = document.getElementById('stepSynthesize');
+
+            // Reset progress UI
+            progressContainer.style.display = 'flex';
+            progressBar.style.width = '10%';
+            progressPercentage.innerText = '10%';
+            progressStatus.innerText = 'Initializing API connection...';
+            
+            stepIngest.className = 'progress-step-card active';
+            stepExtract.className = 'progress-step-card';
+            stepSynthesize.className = 'progress-step-card';
+
+            // Configure API request payload
+            const payload = {
+                files: workspaceFiles.map(f => ({ name: f.name, content: f.content })),
+                model: provider === 'fake' ? null : model
+            };
+
+            // Inject custom API keys based on provider
+            if (provider === 'openrouter') {
+                payload.openrouter_api_key = apiKey;
+            } else if (provider === 'gemini') {
+                payload.gemini_api_key = apiKey;
+            } else if (provider === 'anthropic') {
+                payload.anthropic_api_key = apiKey;
+            }
+
+            // Simulate progress transitions for premium developer experience
+            let fakeProgress = setInterval(() => {
+                let currentWidth = parseFloat(progressBar.style.width);
+                if (currentWidth < 98) {
+                    let increment = currentWidth < 85 ? 8 : 1; // Slow down after 85% to crawl up to 98% smoothly
+                    let nextWidth = Math.min(98, currentWidth + increment);
+                    progressBar.style.width = nextWidth + '%';
+                    progressPercentage.innerText = Math.round(nextWidth) + '%';
+                    
+                    if (nextWidth >= 30 && nextWidth < 65) {
+                        progressStatus.innerText = 'Extracting atomic facts from materials... (typically takes 5-15s)';
+                        stepIngest.className = 'progress-step-card done';
+                        stepExtract.className = 'progress-step-card active';
+                    } else if (nextWidth >= 65) {
+                        progressStatus.innerText = 'Resolving contradictions & synthesizing design document...';
+                        stepExtract.className = 'progress-step-card done';
+                        stepSynthesize.className = 'progress-step-card active';
+                    }
+                }
+            }, 600);
+
+            // Execute backend call
+            fetch('/generate_document', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(async res => {
+                clearInterval(fakeProgress);
+                if (!res.ok) {
+                    const errText = await res.text();
+                    let errMsg = `HTTP Error ${res.status}`;
+                    try {
+                        const errJson = JSON.parse(errText);
+                        if (errJson && errJson.detail) {
+                            errMsg = errJson.detail;
+                        }
+                    } catch(e) {}
+                    throw new Error(errMsg);
+                }
+                return res.json();
+            })
+            .then(data => {
+                progressBar.style.width = '100%';
+                progressPercentage.innerText = '100%';
+                progressStatus.innerText = 'Documentation synthesized successfully!';
+                stepSynthesize.className = 'progress-step-card done';
+                
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    displaySynthesizedDocument(data);
+                }, 800);
+            })
+            .catch(err => {
+                clearInterval(fakeProgress);
+                progressBar.style.width = '0%';
+                progressPercentage.innerText = 'Error';
+                progressStatus.innerText = 'Failed: ' + err.message;
+                alert("Pipeline execution failed: " + err.message);
+            });
+        }
+
+        // Render response document into the premium tab panels
+        function displaySynthesizedDocument(data) {
+            currentFullResponse = data;
+            currentDoc = data.document;
+
+            document.getElementById('emptyResultState').style.display = 'none';
+            document.getElementById('resultContent').style.display = 'flex';
+            document.getElementById('exportButtonGroup').style.display = 'flex';
+
+            // Populate Metadata
+            document.getElementById('metaDuration').innerText = data.metadata.duration_ms + 'ms';
+            document.getElementById('metaCalls').innerText = data.metadata.llm_calls;
+            document.getElementById('metaTokens').innerText = data.metadata.total_tokens;
+            document.getElementById('metaModel').innerText = data.metadata.model_name;
+
+            const doc = data.document;
+
+            // Overview Tab
+            document.getElementById('docOverview').innerText = doc.project_overview || "No project overview was specified in the source materials.";
+
+            // Goals Tab
+            populateList('docGoals', doc.goals, "No project goals were defined.");
+
+            // Requirements Tab
+            populateList('docRequirements', doc.requirements, "No explicit requirements were found in the materials.");
+
+            // Technical Solution Tab
+            document.getElementById('docTechSolution').innerText = doc.technical_solution || "No technical solution was mapped.";
+
+            // Architecture Tab
+            document.getElementById('docArchitecture').innerText = doc.architecture || "No system architecture outlines were detailed.";
+
+            // Team Tab
+            populateList('docTeam', doc.team, "No team allocation details.");
+
+            // Timeline Tab
+            document.getElementById('docTimeline').innerText = doc.timeline || "No timeline outlines specified.";
+
+            // Budget Tab
+            document.getElementById('docBudget').innerText = doc.budget || "No budget boundaries specified.";
+
+            // Risks Tab
+            populateList('docRisks', doc.risks, "No explicit risks identified in the materials.");
+
+            // Conflict warning banner & notes resolution
+            const resolutionNotes = [];
+            
+            // Gather conflict resolution notes from the synthesis trace
+            if (data.trace && data.trace.steps) {
+                data.trace.steps.forEach(step => {
+                    if (step.step === 'synthesis' && step.resolution_notes) {
+                        if (Array.isArray(step.resolution_notes)) {
+                            step.resolution_notes.forEach(note => {
+                                resolutionNotes.push(note);
+                            });
+                        } else if (typeof step.resolution_notes === 'string' && step.resolution_notes.trim()) {
+                            resolutionNotes.push(step.resolution_notes);
+                        }
+                    }
+                });
+            }
+
+            const banner = document.getElementById('conflictBanner');
+            const notesContainer = document.getElementById('conflictNotesList');
+            
+            if (resolutionNotes.length > 0) {
+                banner.style.display = 'flex';
+                notesContainer.innerHTML = resolutionNotes.map(note => `
+                    <div class="conflict-item">✦ ${escapeHtml(note)}</div>
+                `).join('');
+            } else {
+                banner.style.display = 'none';
+            }
+
+            // Trace Logs Tab
+            const traceContainer = document.getElementById('docTrace');
+            if (data.trace && data.trace.steps) {
+                traceContainer.innerHTML = data.trace.steps.map(step => {
+                    let desc = "";
+                    if (step.step === 'ingest') {
+                        desc = `Processed ${step.files ? step.files.length : 0} workspace files.`;
+                    } else if (step.step === 'extraction') {
+                        desc = `Extracted ${step.facts_extracted || 0} facts in batch ${step.batch || 1}/${step.batches_total || 1} (Tokens: In ${step.input_tokens || 0} / Out ${step.output_tokens || 0}).`;
+                    } else if (step.step === 'synthesis') {
+                        desc = `Synthesized document fields using ${step.facts_in || 0} facts and resolved ${step.conflicts_in || 0} contradictions (Tokens: In ${step.input_tokens || 0} / Out ${step.output_tokens || 0}).`;
+                    } else {
+                        desc = `Operation completed.`;
+                    }
+                    return `
+                        <div class="trace-log-item">
+                            <span class="trace-log-step">${step.step}</span>
+                            <span style="font-size: 0.85rem; color: white;">${desc}</span>
+                            <span class="trace-log-metrics">${step.duration_ms || 0} ms</span>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                traceContainer.innerHTML = `<p style="color: var(--text-muted);">No pipeline execution logs available.</p>`;
+            }
+
+            // Always switch to overview tab when new document arrives
+            switchTab('overview');
+        }
+
+        // Helper: Populate Lists
+        function populateList(elementId, itemsArray, emptyMessage) {
+            const el = document.getElementById(elementId);
+            if (!Array.isArray(itemsArray)) {
+                if (typeof itemsArray === 'string' && itemsArray.trim()) {
+                    itemsArray = [itemsArray];
+                } else {
+                    itemsArray = [];
+                }
+            }
+            if (itemsArray.length === 0) {
+                el.innerHTML = `<li style="color: var(--text-muted); font-style: italic; padding-left: 0; list-style: none;">${emptyMessage}</li>`;
+                return;
+            }
+            el.innerHTML = itemsArray.map(item => `
+                <li>${escapeHtml(String(item))}</li>
+            `).join('');
+        }
+
+        // Helper: HTML Escaper
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        // Export Document functions
+        function exportAsMarkdown() {
+            if (!currentDoc) {
+                alert("Please generate documentation first!");
+                return;
+            }
+            
+            let md = `# Project Design Documentation\n\n`;
+            
+            md += `## 1. Project Overview\n${currentDoc.project_overview || "No overview available."}\n\n`;
+            
+            md += `## 2. Key Goals\n`;
+            if (currentDoc.goals && currentDoc.goals.length > 0) {
+                currentDoc.goals.forEach(item => { md += `- ${item}\n`; });
+            } else {
+                md += `*No goals defined.*\n`;
+            }
+            md += `\n`;
+            
+            md += `## 3. System Requirements\n`;
+            if (currentDoc.requirements && currentDoc.requirements.length > 0) {
+                currentDoc.requirements.forEach(item => { md += `- ${item}\n`; });
+            } else {
+                md += `*No requirements defined.*\n`;
+            }
+            md += `\n`;
+            
+            md += `## 4. Technical Solution\n${currentDoc.technical_solution || "No technical solution mapped."}\n\n`;
+            
+            md += `## 5. System Architecture\n\`\`\`\n${currentDoc.architecture || "No architecture detailed."}\n\`\`\`\n\n`;
+            
+            md += `## 6. Engineering Team\n`;
+            if (currentDoc.team && currentDoc.team.length > 0) {
+                currentDoc.team.forEach(item => { md += `- ${item}\n`; });
+            } else {
+                md += `*No team mapped.*\n`;
+            }
+            md += `\n`;
+            
+            md += `## 7. Project Timeline\n${currentDoc.timeline || "No timeline outlines mapped."}\n\n`;
+            
+            md += `## 8. Budget Projections\n${currentDoc.budget || "No budget boundaries mapped."}\n\n`;
+            
+            md += `## 9. Risks Identified\n`;
+            if (currentDoc.risks && currentDoc.risks.length > 0) {
+                currentDoc.risks.forEach(item => { md += `- ${item}\n`; });
+            } else {
+                md += `*No risks identified.*\n`;
+            }
+            md += `\n`;
+            
+            // Build audit trace logs
+            if (currentFullResponse && currentFullResponse.trace && currentFullResponse.trace.steps) {
+                md += `## 10. Verification & Audit Trace\n`;
+                currentFullResponse.trace.steps.forEach(step => {
+                    let desc = "";
+                    if (step.step === 'ingest') {
+                        desc = `Processed ${step.files ? step.files.length : 0} workspace files.`;
+                    } else if (step.step === 'extraction') {
+                        desc = `Extracted ${step.facts_extracted || 0} facts in batch ${step.batch || 1}/${step.batches_total || 1}.`;
+                    } else if (step.step === 'synthesis') {
+                        desc = `Synthesized document fields using ${step.facts_in || 0} facts and resolved ${step.conflicts_in || 0} contradictions.`;
+                    } else {
+                        desc = `Operation completed.`;
+                    }
+                    md += `*   **${step.step.toUpperCase()}**: ${desc} (${step.duration_ms || 0} ms)\n`;
+                });
+                md += `\n`;
+            }
+            
+            // Trigger browser download
+            const blob = new Blob([md], { type: 'text/markdown;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "design_documentation.md");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportAsJSON() {
+            if (!currentFullResponse) {
+                alert("Please generate documentation first!");
+                return;
+            }
+            const blob = new Blob([JSON.stringify(currentFullResponse, null, 2)], { type: 'application/json;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "design_documentation.json");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Setup Drag & Drop Handlers
+        const dropzone = document.getElementById('uploadDropzone');
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+            }, false);
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }, false);
+
+        function triggerFileInput() {
+            document.getElementById('hiddenFileInput').click();
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const content = event.target.result;
+                    const existingIdx = workspaceFiles.findIndex(f => f.name === file.name);
+                    if (existingIdx !== -1) {
+                        workspaceFiles[existingIdx].content = content;
+                    } else {
+                        workspaceFiles.push({
+                            name: file.name,
+                            content: content
+                        });
+                    }
+                    renderFileList();
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // Persistent Configuration Handlers
+        function loadSettingsFromServer() {
+            fetch('/config')
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data) {
+                    if (data.default_model) {
+                        document.getElementById('llmModel').value = data.default_model;
+                        
+                        // Auto detect provider based on model naming or saved key presence
+                        let provider = 'openrouter';
+                        if (data.default_model.startsWith('gemini')) {
+                            provider = 'gemini';
+                        } else if (data.default_model.startsWith('claude')) {
+                            provider = 'anthropic';
+                        } else if (data.default_model === 'fake') {
+                            provider = 'fake';
+                        }
+                        document.getElementById('llmProvider').value = provider;
+                    }
+                    
+                    // Restore API Keys
+                    const provider = document.getElementById('llmProvider').value;
+                    let savedKey = "";
+                    if (provider === 'openrouter') {
+                        savedKey = data.openrouter_api_key;
+                    } else if (provider === 'gemini') {
+                        savedKey = data.gemini_api_key;
+                    } else if (provider === 'anthropic') {
+                        savedKey = data.anthropic_api_key;
+                    }
+                    
+                    if (savedKey) {
+                        document.getElementById('apiKey').value = savedKey;
+                    }
+                    
+                    toggleProviderFields();
+                }
+            })
+            .catch(err => console.error("Failed to load configs:", err));
+        }
+
+        function persistSettingsOnServer() {
+            const provider = document.getElementById('llmProvider').value;
+            const model = document.getElementById('llmModel').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+
+            const settings = {
+                default_model: provider === 'fake' ? 'fake' : model,
+                openrouter_api_key: provider === 'openrouter' ? apiKey : null,
+                anthropic_api_key: provider === 'anthropic' ? apiKey : null,
+                gemini_api_key: provider === 'gemini' ? apiKey : null
+            };
+
+            fetch('/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(settings)
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("HTTP error " + res.status);
+                return res.json();
+            })
+            .then(data => {
+                alert("Settings saved successfully as server default! (config.json updated)");
+            })
+            .catch(err => {
+                alert("Failed to save settings: " + err.message);
+            });
+        }
+
+        // Initialize UI
+        toggleProviderFields();
+        renderFileList();
+        loadSettingsFromServer();
+    </script>
+</body>
+</html>
