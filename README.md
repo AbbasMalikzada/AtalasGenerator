@@ -1,119 +1,117 @@
-# Генерация проектной документации (Задание 1)
+# Project Documentation Generator (Task 1)
 
-Система формирует структурированную проектную документацию из набора
-разрозненных материалов (`.txt`, `.md`, `.json`, `.py`, `.java`) с помощью LLM.
-Точка входа — HTTP API `POST /generate_document`. Результат строго соответствует
-формату из ТЗ: `{ document, metadata, trace }`.
+The system generates structured project documentation from a set of raw materials
+(`.txt`, `.md`, `.json`, `.py`, `.java`) using an LLM.
+Entry point: HTTP API `POST /generate_document`. The response strictly matches
+the required format: `{ document, metadata, trace }`.
 
-## Идея решения: двухэтапный pipeline
+## Core Idea: Two-Stage Pipeline
 
-Ключевой приём против галлюцинаций — **разделение «извлечения» и «синтеза»**:
+The key technique against hallucinations is **separating "extraction" from "synthesis"**:
 
-1. **Extraction.** LLM читает все файлы (с разделителями и пометкой типа) и
-   возвращает *только явные факты*, каждый привязан к файлу-источнику.
-   Взаимоисключающие утверждения помечаются как `conflicts`, модель их не
-   «разрешает» сама.
-2. **Synthesis.** LLM собирает документ **строго из списка фактов**. Поля без
-   подтверждающих фактов остаются пустыми (`""` / `[]`) — выдумывать запрещено.
-   Конфликты разрешаются с обоснованием в `resolution_notes` (попадает в trace).
+1. **Extraction.** The LLM reads all files (with delimiters and type labels) and
+   returns *only explicit facts*, each linked to its source file.
+   Mutually exclusive statements are flagged as `conflicts` — the model does not
+   resolve them on its own.
+2. **Synthesis.** The LLM assembles the document **strictly from the fact list**. Fields
+   with no supporting facts are left empty (`""` / `[]`) — no invention allowed.
+   Conflicts are resolved with a justification written to `resolution_notes` (included in trace).
 
-Поверх ответа модели работает **жёсткая нормализация схемы** (`coerce_document`):
-неизвестные ключи отбрасываются, типы приводятся, дубликаты убираются. Даже если
-модель «съедет» по формату — на выходе всегда валидная структура.
+On top of the model response, **strict schema normalization** (`coerce_document`) runs:
+unknown keys are dropped, types are coerced, duplicates removed. Even if the model
+drifts from the format, the output is always a valid structure.
 
 ```
-файлы → ingest (нормализация, усечение) → extraction (факты+конфликты) → synthesis (документ) → валидация схемы
+files → ingest (normalize, truncate) → extraction (facts + conflicts) → synthesis (document) → schema validation
 ```
 
-## Соответствие критериям оценки
+## Evaluation Criteria
 
-| Критерий | Как обеспечивается |
+| Criterion | How it is met |
 |---|---|
-| Достоверность и полнота (40%) | факты с привязкой к источнику; синтез строго по фактам; батчинг сохраняет все файлы |
-| Отсутствие галлюцинаций (20%) | `temperature=0`; разделение extract/synthesize; запрет домыслов в промптах; пустые поля вместо вымысла; валидация схемы |
-| Эффективность по токенам (10%) | усечение крупных файлов; единый extraction-вызов; компактные факты вместо «сырого» текста на синтезе |
-| Число вызовов LLM (10%) | типично **2 вызова** (1 extraction + 1 synthesis); батчинг только для очень больших входов |
-| Время выполнения (10%) | фиксируется поэтапно в `trace` и суммарно в `metadata.duration_ms` |
-| Структура и формат (10%) | Pydantic-схема ответа + принудительная нормализация |
+| Accuracy & completeness (40%) | Facts linked to source; synthesis strictly from facts; batching preserves all files |
+| No hallucinations (20%) | `temperature=0`; separated extract/synthesize stages; prompts forbid invention; empty fields instead of guesses; schema validation |
+| Token efficiency (10%) | Large files truncated; single extraction call; compact facts passed to synthesis instead of raw text |
+| LLM call count (10%) | Typically **2 calls** (1 extraction + 1 synthesis); batching only for very large inputs |
+| Execution time (10%) | Tracked per step in `trace` and totalled in `metadata.duration_ms` |
+| Structure & format (10%) | Pydantic response schema + forced normalization |
 
-Воспроизводимость: фиксированная модель, `temperature=0`, детерминированные
-промпты; полный `trace` каждого шага.
+Reproducibility: fixed model, `temperature=0`, deterministic prompts; full `trace` per step.
 
-## Установка и запуск (Windows)
+## Setup & Running (Windows)
 
-Для удобного запуска на Windows созданы `.bat` файлы в корневой директории:
-*   **Запуск сервера**: Двойной клик на `start_server.bat` (запускает FastAPI на `http://127.0.0.1:8000`).
-*   **Запуск офлайн-симуляции CLI**: Двойной клик на `run_cli_simulation.bat` (прогоняет CLI по `sample_data` без сети).
-*   **Запуск живого CLI**: `run_cli_live.bat <путь_к_директории>` (прогоняет live-генерацию по директории).
+Convenience `.bat` files are provided in the root directory:
+- **Start server**: Double-click `start_server.bat` (launches FastAPI on `http://127.0.0.1:8000`).
+- **Offline CLI simulation**: Double-click `run_cli_simulation.bat` (runs CLI over `sample_data` with no network).
+- **Live CLI**: `run_cli_live.bat <path_to_directory>` (runs live generation over a directory).
 
 ---
 
-## Установка и запуск (Linux / Терминал)
+## Setup & Running (Linux / Terminal)
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# Для Anthropic:
+# For Anthropic:
 export ANTHROPIC_API_KEY=sk-...
 export DOCGEN_MODEL=claude-sonnet-4-20250514
 
-# ИЛИ Для Google Gemini:
+# OR for Google Gemini:
 export GEMINI_API_KEY=AIzaSy...
 export DOCGEN_MODEL=gemini-2.5-flash
 
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Запрос:
+Example request:
 
 ```bash
 curl -X POST http://localhost:8000/generate_document \
   -H "Content-Type: application/json" \
   -d '{
     "files": [
-      {"name": "notes.md", "content": "Цель: ускорить подготовку ТЗ. Срок: 8 недель."},
-      {"name": "budget.json", "content": "{\"total\": 1200000, \"currency\": \"RUB\"}"}
+      {"name": "notes.md", "content": "Goal: accelerate spec writing. Timeline: 8 weeks."},
+      {"name": "budget.json", "content": "{\"total\": 150000, \"currency\": \"USD\"}"}
     ]
   }'
 ```
 
-## Offline-режим (без сети и без ключа)
+## Offline Mode (no network, no API key)
 
-Для разработки/CI есть детерминированная заглушка `FakeLLM` (эвристический разбор,
-без обращения к сети). Включается переменной `DOCGEN_FAKE=1`:
+For development/CI there is a deterministic stub `FakeLLM` (heuristic parsing,
+no network calls). Enable it with `DOCGEN_FAKE=1`:
 
 ```bash
-# прогон по примерам
+# run over sample data
 DOCGEN_FAKE=1 python run_cli.py sample_data
 
-# запуск тестов
+# run tests
 python tests/test_pipeline.py
 ```
 
-> Заглушка нужна только чтобы проверить «обвязку» (роутинг фактов, схему, trace,
-> подсчёт вызовов/токенов). Качество извлечения у неё примитивное — на боевой
-> модели результат содержательный.
+> The stub only verifies the "wiring" (fact routing, schema, trace, call/token counting).
+> Its extraction quality is primitive — a real model produces meaningful output.
 
-## Структура
+## Project Structure
 
 ```
 app/
   main.py       — FastAPI, POST /generate_document
-  pipeline.py   — оркестрация: ingest → extraction → synthesis, trace, metadata
-  prompts.py    — промпты двух этапов (строгие, JSON-only)
-  llm.py        — клиент LLM (Anthropic) + учёт вызовов/токенов + FakeLLM
-  ingest.py     — приём/нормализация файлов, батчинг
-  jsonutil.py   — устойчивый разбор JSON от модели
-  schema.py     — строгая схема ответа и нормализация документа
-sample_data/    — примеры (с дублями и одним конфликтом по сроку 8 vs 10 недель)
-tests/          — offline-тесты
-run_cli.py      — запуск pipeline по директории
+  pipeline.py   — orchestration: ingest → extraction → synthesis, trace, metadata
+  prompts.py    — prompts for both stages (strict, JSON-only)
+  llm.py        — LLM clients (Anthropic, OpenAI, Gemini, OpenRouter) + FakeLLM
+  ingest.py     — file ingestion/normalization, batching
+  jsonutil.py   — robust JSON parsing from model output
+  schema.py     — strict response schema and document normalization
+sample_data/    — example files (with duplicates and one timeline conflict: 8 vs 10 weeks)
+tests/          — offline tests
+run_cli.py      — run pipeline over a directory
 ```
 
-## Возможные доработки
+## Possible Improvements
 
-- Кэш фактов по хешу файла (экономия токенов при повторных запусках).
-- Подсчёт токенов через `client.messages.count_tokens` до вызова (бюджетирование).
-- Поддержка ещё форматов (`.csv`, `.yaml`) и multipart-загрузки файлов.
-- Возврат источников рядом с каждым пунктом документа (трассируемость до файла).
+- Fact cache keyed by file hash (saves tokens on repeated runs).
+- Token counting via `client.messages.count_tokens` before calling (budget management).
+- Support for more formats (`.csv`, `.yaml`) and multipart file upload.
+- Return source attribution alongside each document item (full traceability to file).

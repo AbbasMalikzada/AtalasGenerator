@@ -1,13 +1,13 @@
-"""Оркестрация двухэтапного pipeline: extraction -> synthesis.
+"""Two-stage pipeline orchestration: extraction -> synthesis.
 
-Принципы под критерии оценки:
-- Достоверность/полнота: факты привязаны к источникам, синтез строго по фактам.
-- Без галлюцинаций: t=0, два разделённых этапа, валидация схемы, пустые поля
-  вместо домыслов.
-- Эффективность токенов: усечение больших файлов, батчинг по бюджету.
-- Мало вызовов LLM: типичный случай — 2 вызова (1 extraction + 1 synthesis);
-  для крупных входов extraction идёт батчами, synthesis всегда один.
-- Время: фиксируется поэтапно в trace и суммарно в metadata.
+Design principles:
+- Accuracy/completeness: facts are linked to sources; synthesis is strictly from facts.
+- No hallucinations: temperature=0, two separated stages, schema validation,
+  empty fields instead of invented data.
+- Token efficiency: large files are truncated, batching by character budget.
+- Minimal LLM calls: typical case is 2 calls (1 extraction + 1 synthesis);
+  for large inputs extraction batches, synthesis is always a single call.
+- Timing: recorded per step in trace and summed in metadata.
 """
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ from .prompts import (
 )
 from .schema import Document, GenerateResponse, Metadata, Trace, coerce_document
 
-# Бюджет символов на один extraction-вызов (батчинг крупных входов).
+# Character budget per extraction call (batches large inputs).
 EXTRACTION_CHAR_BUDGET = 45_000
 _ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE_FILE = os.path.join(_ROOT_DIR, ".fact_cache.json")
@@ -112,7 +112,7 @@ def _extract(llm: LLMBase, files: List[NormalizedFile], trace_steps: List[Dict[s
         else:
             misses.append(f)
 
-    # Логируем результаты проверки кэша в trace
+    # Log cache lookup results to trace
     trace_steps.append({
         "step": "cache_lookup",
         "files_total": len(files),
@@ -140,21 +140,21 @@ def _extract(llm: LLMBase, files: List[NormalizedFile], trace_steps: List[Dict[s
                 data = extract_json(raw)
                 facts = data.get("facts", []) if isinstance(data, dict) else []
                 conflicts = data.get("conflicts", []) if isinstance(data, dict) else []
-                
+
                 new_facts = [f for f in facts if isinstance(f, dict)]
                 new_conflicts = [c for c in conflicts if isinstance(c, dict)]
-                
+
                 all_facts.extend(new_facts)
                 all_conflicts.extend(new_conflicts)
-                
+
                 step["facts_extracted"] = len(new_facts)
                 step["conflicts_found"] = len(new_conflicts)
 
-                # Сохраняем извлечённые факты по каждому файлу в кэш
+                # Cache extracted facts per file
                 for f in batch:
                     file_facts = [fact for fact in new_facts if fact.get("source") == f.name]
                     file_conflicts = [c for c in new_conflicts if f.name in c.get("sources", [])]
-                    
+
                     cache[f.name] = {
                         "hash": _md5(f.content),
                         "facts": file_facts,
@@ -164,7 +164,7 @@ def _extract(llm: LLMBase, files: List[NormalizedFile], trace_steps: List[Dict[s
                 step["error"] = f"extraction parse failed: {e}"
             trace_steps.append(step)
 
-        # Сохраняем обновлённый кэш на диск
+        # Persist updated cache to disk
         _save_cache(cache)
 
     return {"facts": all_facts, "conflicts": all_conflicts}
@@ -208,7 +208,7 @@ def generate_document(
     start = _now_ms()
     trace_steps: List[Dict[str, Any]] = []
 
-    # Загружаем настройки по умолчанию с диска в качестве fallbacks
+    # Load saved defaults from disk as fallbacks
     cfg = load_app_config()
     model = model or cfg.get("default_model")
     openrouter_key = openrouter_key or cfg.get("openrouter_api_key")
@@ -236,7 +236,7 @@ def generate_document(
     )
 
     if not norm:
-        # ничего не выдумываем — возвращаем пустой валидный документ
+        # No input — return empty valid document without inventing anything
         return GenerateResponse(
             document=coerce_document({}),
             metadata=Metadata(
