@@ -197,10 +197,20 @@
             transition: all 0.3s ease;
         }
 
+        select {
+            background: #1a1b2e;
+            color: #f3f4f6;
+        }
+
         input[type="text"]:focus, select:focus, textarea:focus {
             border-color: var(--accent-primary);
             background: rgba(255, 255, 255, 0.06);
             box-shadow: 0 0 10px rgba(139, 92, 246, 0.25);
+        }
+
+        select option {
+            background: #1a1b2e;
+            color: #f3f4f6;
         }
 
         /* Custom Checkbox */
@@ -977,6 +987,7 @@
                 <select id="llmProvider" onchange="toggleProviderFields()">
                     <option value="fake">Offline Simulation (FakeLLM - Free/No Key)</option>
                     <option value="openrouter" selected>OpenRouter AI (Any Model)</option>
+                    <option value="openai">OpenAI API (Direct)</option>
                     <option value="gemini">Google Gemini API (Direct)</option>
                     <option value="anthropic">Anthropic Claude API (Direct)</option>
                 </select>
@@ -1312,6 +1323,12 @@
                 if (!modelInput.value.includes('/')) {
                     modelInput.value = "anthropic/claude-3.5-sonnet:beta";
                 }
+            } else if (provider === 'openai') {
+                modelGroup.style.display = 'flex';
+                apiKeyGroup.style.display = 'flex';
+                keyLabel.innerText = "OpenAI API Key";
+                apiKey.placeholder = "sk-...";
+                modelInput.value = "gpt-4o";
             } else if (provider === 'gemini') {
                 modelGroup.style.display = 'flex';
                 apiKeyGroup.style.display = 'flex';
@@ -1323,7 +1340,7 @@
                 apiKeyGroup.style.display = 'flex';
                 keyLabel.innerText = "Anthropic API Key";
                 apiKey.placeholder = "sk-ant-...";
-                modelInput.value = "claude-3-5-sonnet-20241022";
+                modelInput.value = "claude-sonnet-4-20250514";
             }
         }
 
@@ -1473,6 +1490,8 @@
             // Inject custom API keys based on provider
             if (provider === 'openrouter') {
                 payload.openrouter_api_key = apiKey;
+            } else if (provider === 'openai') {
+                payload.openai_api_key = apiKey;
             } else if (provider === 'gemini') {
                 payload.gemini_api_key = apiKey;
             } else if (provider === 'anthropic') {
@@ -1836,21 +1855,25 @@
                         
                         // Auto detect provider based on model naming or saved key presence
                         let provider = 'openrouter';
-                        if (data.default_model.startsWith('gemini')) {
+                        if (data.default_model.startsWith('gemini-') || data.default_model.startsWith('gemini/')) {
                             provider = 'gemini';
                         } else if (data.default_model.startsWith('claude')) {
                             provider = 'anthropic';
+                        } else if (data.default_model.startsWith('gpt-') || data.default_model.startsWith('o1-') || data.default_model.startsWith('o3-') || data.default_model === 'gpt-4o') {
+                            provider = 'openai';
                         } else if (data.default_model === 'fake') {
                             provider = 'fake';
                         }
                         document.getElementById('llmProvider').value = provider;
                     }
-                    
+
                     // Restore API Keys
                     const provider = document.getElementById('llmProvider').value;
                     let savedKey = "";
                     if (provider === 'openrouter') {
                         savedKey = data.openrouter_api_key;
+                    } else if (provider === 'openai') {
+                        savedKey = data.openai_api_key;
                     } else if (provider === 'gemini') {
                         savedKey = data.gemini_api_key;
                     } else if (provider === 'anthropic') {
@@ -1875,8 +1898,9 @@
             const settings = {
                 default_model: provider === 'fake' ? 'fake' : model,
                 openrouter_api_key: provider === 'openrouter' ? apiKey : null,
+                openai_api_key: provider === 'openai' ? apiKey : null,
                 anthropic_api_key: provider === 'anthropic' ? apiKey : null,
-                gemini_api_key: provider === 'gemini' ? apiKey : null
+                gemini_api_key: provider === 'gemini' ? apiKey : null,
             };
 
             fetch('/config', {

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info)",
+      "Bash(Start-Sleep -Seconds 3)",
+      "Bash(Get-Content \"C:\\\\Users\\\\ABBASM~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Abbas-Malikzada-Desktop-Hackaton-Task-1\\\\41a461c6-0ccb-49c2-90a9-a8e566e5cab9\\\\tasks\\\\b7qjyxpc1.output\" -ErrorAction SilentlyContinue)",
+      "Bash(DOCGEN_FAKE=1 python tests/test_pipeline.py)",
+      "Bash(python tests/test_api_client.py)",
+      "Bash(uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(python -c \"import dotenv; print\\('ok'\\)\" 2>&1)"
+    ]
+  }
+}

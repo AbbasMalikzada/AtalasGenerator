@@ -1,6 +1,7 @@
 {
-  "default_model": null,
-  "openrouter_api_key": null,
+  "default_model": "openai/gpt-oss-120b:free",
+  "openrouter_api_key": "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",
   "anthropic_api_key": null,
-  "gemini_api_key": null
+  "gemini_api_key": null,
+  "openai_api_key": null
 }

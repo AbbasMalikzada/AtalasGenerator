@@ -1,0 +1,102 @@
+{
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\.fact_cache.json": {
+    "mtime": 1780157348.1017451,
+    "ast_hash": "87db4b52cbbcd7270ccd446b987afd85",
+    "semantic_hash": "87db4b52cbbcd7270ccd446b987afd85"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\config.json": {
+    "mtime": 1780156569.7458084,
+    "ast_hash": "d6acb34d218472cea572617268545385",
+    "semantic_hash": "d6acb34d218472cea572617268545385"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\run_cli.py": {
+    "mtime": 1780157095.5926695,
+    "ast_hash": "d694a225d42733a808b3966c2d5f7a7c",
+    "semantic_hash": "d694a225d42733a808b3966c2d5f7a7c"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\app\\ingest.py": {
+    "mtime": 1780153467.4742706,
+    "ast_hash": "f13d250f8b14609bf87b591083f1e0de",
+    "semantic_hash": "f13d250f8b14609bf87b591083f1e0de"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\app\\jsonutil.py": {
+    "mtime": 1780153469.211073,
+    "ast_hash": "6bef4361101beae763d1ec8d1add0841",
+    "semantic_hash": "6bef4361101beae763d1ec8d1add0841"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\app\\llm.py": {
+    "mtime": 1780153657.020793,
+    "ast_hash": "0ebb42df50afa3000ab59dc79fe6ad0e",
+    "semantic_hash": "0ebb42df50afa3000ab59dc79fe6ad0e"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\app\\main.py": {
+    "mtime": 1780156365.222021,
+    "ast_hash": "36f58d525241f02a1b703ab410233311",
+    "semantic_hash": "36f58d525241f02a1b703ab410233311"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\app\\pipeline.py": {
+    "mtime": 1780156358.2348144,
+    "ast_hash": "19884ca8a46ef7c94030f2c48a5dcaaf",
+    "semantic_hash": "19884ca8a46ef7c94030f2c48a5dcaaf"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\app\\prompts.py": {
+    "mtime": 1780154654.4834332,
+    "ast_hash": "cdae5da43eccb4ce0d509381ace595d7",
+    "semantic_hash": "cdae5da43eccb4ce0d509381ace595d7"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\app\\schema.py": {
+    "mtime": 1780156352.440039,
+    "ast_hash": "4797b78a98546df5318fb4fbe7e430ae",
+    "semantic_hash": "4797b78a98546df5318fb4fbe7e430ae"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\app\\__init__.py": {
+    "mtime": 1780153465.2405634,
+    "ast_hash": "d12b22459459a8c06e159e1aad1795b3",
+    "semantic_hash": "d12b22459459a8c06e159e1aad1795b3"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\sample_data\\budget.json": {
+    "mtime": 1780153506.1300154,
+    "ast_hash": "8175304143619d5126fe8ac7d08f5044",
+    "semantic_hash": "8175304143619d5126fe8ac7d08f5044"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\tests\\test_api_client.py": {
+    "mtime": 1780153557.9427354,
+    "ast_hash": "a281fb704ee6dfb750feeccb47e3f9a2",
+    "semantic_hash": "a281fb704ee6dfb750feeccb47e3f9a2"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\tests\\test_pipeline.py": {
+    "mtime": 1780156394.192874,
+    "ast_hash": "f432227152289ee5eb469c9fb1ff769c",
+    "semantic_hash": "f432227152289ee5eb469c9fb1ff769c"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\README.md": {
+    "mtime": 1780157038.317434,
+    "ast_hash": "7e20086ac9b8f19db785321ad187471c",
+    "semantic_hash": "7e20086ac9b8f19db785321ad187471c"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\requirements.txt": {
+    "mtime": 1780152905.2856855,
+    "ast_hash": "324a6cdf8da97371a7873ba4535e08ec",
+    "semantic_hash": "324a6cdf8da97371a7873ba4535e08ec"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\app\\dashboard.html": {
+    "mtime": 1780156437.494542,
+    "ast_hash": "34de830164969ef41fefdf49b32d035b",
+    "semantic_hash": "34de830164969ef41fefdf49b32d035b"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\sample_data\\engineering_notes.txt": {
+    "mtime": 1780153507.5583875,
+    "ast_hash": "d55189cf0a08aa401905725f6065298e",
+    "semantic_hash": "d55189cf0a08aa401905725f6065298e"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\sample_data\\meeting_notes.md": {
+    "mtime": 1780153508.9928346,
+    "ast_hash": "aa8c9110bb673020b322aae9555225f8",
+    "semantic_hash": "aa8c9110bb673020b322aae9555225f8"
+  },
+  "C:\\Users\\Abbas Malikzada\\Desktop\\Hackaton\\Task 1\\sample_data\\project_brief.md": {
+    "mtime": 1780153504.9779775,
+    "ast_hash": "73ca835c5dfc27808ceb5752d1e150a2",
+    "semantic_hash": "73ca835c5dfc27808ceb5752d1e150a2"
+  }
+}

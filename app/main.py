@@ -14,6 +14,11 @@ POST /generate_document
 from __future__ import annotations
 
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
 
@@ -58,7 +63,8 @@ def get_config() -> ConfigSettings:
         default_model=cfg.get("default_model"),
         openrouter_api_key=cfg.get("openrouter_api_key"),
         anthropic_api_key=cfg.get("anthropic_api_key"),
-        gemini_api_key=cfg.get("gemini_api_key")
+        gemini_api_key=cfg.get("gemini_api_key"),
+        openai_api_key=cfg.get("openai_api_key"),
     )
 
 
@@ -68,7 +74,8 @@ def save_config(settings: ConfigSettings) -> dict:
         "default_model": settings.default_model,
         "openrouter_api_key": settings.openrouter_api_key,
         "anthropic_api_key": settings.anthropic_api_key,
-        "gemini_api_key": settings.gemini_api_key
+        "gemini_api_key": settings.gemini_api_key,
+        "openai_api_key": settings.openai_api_key,
     })
     return {"status": "success", "message": "Configuration saved successfully"}
 
@@ -82,7 +89,8 @@ def generate(req: GenerateRequest) -> JSONResponse:
             model=req.model,
             openrouter_key=req.openrouter_api_key,
             anthropic_key=req.anthropic_api_key,
-            gemini_key=req.gemini_api_key
+            gemini_key=req.gemini_api_key,
+            openai_key=req.openai_api_key,
         )
         return JSONResponse(content=result.model_dump())
     except Exception as e:
@@ -104,7 +112,8 @@ async def generate_multipart(
     model: str | None = Form(None),
     openrouter_api_key: str | None = Form(None),
     anthropic_api_key: str | None = Form(None),
-    gemini_api_key: str | None = Form(None)
+    gemini_api_key: str | None = Form(None),
+    openai_api_key: str | None = Form(None),
 ) -> JSONResponse:
     try:
         doc_files = []
@@ -121,7 +130,8 @@ async def generate_multipart(
             model=model,
             openrouter_key=openrouter_api_key,
             anthropic_key=anthropic_api_key,
-            gemini_key=gemini_api_key
+            gemini_key=gemini_api_key,
+            openai_key=openai_api_key,
         )
         return JSONResponse(content=result.model_dump())
     except Exception as e:

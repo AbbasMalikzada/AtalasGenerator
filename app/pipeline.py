@@ -30,8 +30,9 @@ from .schema import Document, GenerateResponse, Metadata, Trace, coerce_document
 
 # Бюджет символов на один extraction-вызов (батчинг крупных входов).
 EXTRACTION_CHAR_BUDGET = 45_000
-CACHE_FILE = ".fact_cache.json"
-CONFIG_JSON = "config.json"
+_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CACHE_FILE = os.path.join(_ROOT_DIR, ".fact_cache.json")
+CONFIG_JSON = os.path.join(_ROOT_DIR, "config.json")
 
 
 def load_app_config() -> Dict[str, Any]:
@@ -201,7 +202,8 @@ def generate_document(
     model: str | None = None,
     openrouter_key: str | None = None,
     anthropic_key: str | None = None,
-    gemini_key: str | None = None
+    gemini_key: str | None = None,
+    openai_key: str | None = None,
 ) -> GenerateResponse:
     start = _now_ms()
     trace_steps: List[Dict[str, Any]] = []
@@ -212,12 +214,14 @@ def generate_document(
     openrouter_key = openrouter_key or cfg.get("openrouter_api_key")
     anthropic_key = anthropic_key or cfg.get("anthropic_api_key")
     gemini_key = gemini_key or cfg.get("gemini_api_key")
+    openai_key = openai_key or cfg.get("openai_api_key")
 
     llm = make_llm(
         model=model,
         openrouter_key=openrouter_key,
         anthropic_key=anthropic_key,
-        gemini_key=gemini_key
+        gemini_key=gemini_key,
+        openai_key=openai_key,
     )
 
     t0 = _now_ms()

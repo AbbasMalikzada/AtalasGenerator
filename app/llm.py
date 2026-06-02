@@ -1,22 +1,22 @@
-"""Обёртки над LLM с учётом числа вызовов и токенов.
+"""LLM wrappers with call and token tracking.
 
-AnthropicLLM — боевой клиент Anthropic (требует пакет `anthropic` и ANTHROPIC_API_KEY).
-GeminiLLM — боевой клиент Gemini via HTTP REST API (требует GEMINI_API_KEY или GOOGLE_API_KEY).
-OpenRouterLLM — боевой клиент OpenRouter (требует OPENROUTER_API_KEY).
-FakeLLM — детерминированная заглушка для offline-тестов и CI: реальная сеть не
-нужна, что позволяет проверить весь pipeline без ключа.
+AnthropicLLM  — Anthropic client (requires `anthropic` package + ANTHROPIC_API_KEY).
+GeminiLLM     — Google Gemini via HTTP REST (requires GEMINI_API_KEY or GOOGLE_API_KEY).
+OpenAILLM     — Direct OpenAI chat completions (requires OPENAI_API_KEY).
+OpenRouterLLM — OpenRouter proxy (requires OPENROUTER_API_KEY).
+FakeLLM       — Deterministic offline stub for tests and CI; no network required.
 """
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 from dataclasses import dataclass, field
 from typing import List
 
-# Модель по умолчанию. Переопределяется переменной окружения DOCGEN_MODEL или
-# полем `model` в запросе.
 DEFAULT_MODEL = os.getenv("DOCGEN_MODEL", "claude-sonnet-4-20250514")
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -39,15 +39,14 @@ class LLMBase:
 class AnthropicLLM(LLMBase):
     def __init__(self, model: str | None = None, api_key: str | None = None):
         super().__init__(model=model or DEFAULT_MODEL)
-        from anthropic import Anthropic  # импорт здесь, чтобы offline не падал
-
+        from anthropic import Anthropic
         self.client = Anthropic(api_key=api_key or os.getenv("ANTHROPIC_API_KEY"))
 
     def complete(self, system: str, user: str, max_tokens: int = 4096) -> str:
         resp = self.client.messages.create(
             model=self.model,
             max_tokens=max_tokens,
-            temperature=0,  # детерминизм -> воспроизводимость
+            temperature=0,
             system=system,
             messages=[{"role": "user", "content": user}],
         )
@@ -61,7 +60,7 @@ class AnthropicLLM(LLMBase):
 
 
 class GeminiLLM(LLMBase):
-    """Боевой клиент Gemini через официальный HTTP REST API."""
+    """Google Gemini via HTTP REST API."""
 
     def __init__(self, model: str | None = None, api_key: str | None = None):
         model_name = model or os.getenv("DOCGEN_MODEL") or "gemini-2.5-flash"
@@ -71,36 +70,74 @@ class GeminiLLM(LLMBase):
     def complete(self, system: str, user: str, max_tokens: int = 4096) -> str:
         import requests
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{self.model}:generateContent?key={self.api_key}"
+        )
         payload = {
-            "contents": [
-                {
-                    "parts": [{"text": user}]
-                }
-            ],
-            "systemInstruction": {
-                "parts": [{"text": system}]
-            },
+            "contents": [{"parts": [{"text": user}]}],
+            "systemInstruction": {"parts": [{"text": system}]},
             "generationConfig": {
                 "temperature": 0.0,
                 "responseMimeType": "application/json",
-                "maxOutputTokens": max_tokens
-            }
+                "maxOutputTokens": max_tokens,
+            },
         }
-        
         resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
         resp.raise_for_status()
         res_json = resp.json()
-        
         try:
             text = res_json["candidates"][0]["content"]["parts"][0]["text"]
         except (KeyError, IndexError) as e:
-            raise ValueError(f"Failed to parse Gemini API response: {e}. Full response: {res_json}")
-            
+            raise ValueError(
+                f"Failed to parse Gemini API response: {e}. Full response: {res_json}"
+            )
         usage = res_json.get("usageMetadata", {})
         input_tokens = usage.get("promptTokenCount", len(user) // 4)
         output_tokens = usage.get("candidatesTokenCount", len(text) // 4)
-        
+        self.calls += 1
+        self._last_usage = Usage(input_tokens, output_tokens)
+        self.total_tokens += input_tokens + output_tokens
+        return text
+
+
+class OpenAILLM(LLMBase):
+    """Direct OpenAI client via the chat completions REST API."""
+
+    def __init__(self, model: str | None = None, api_key: str | None = None):
+        model_name = model or os.getenv("DOCGEN_MODEL") or "gpt-4o"
+        super().__init__(model=model_name)
+        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
+
+    def complete(self, system: str, user: str, max_tokens: int = 4096) -> str:
+        import requests
+
+        url = "https://api.openai.com/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "temperature": 0,
+            "max_tokens": max_tokens,
+        }
+        resp = requests.post(url, json=payload, headers=headers)
+        resp.raise_for_status()
+        res_json = resp.json()
+        try:
+            text = res_json["choices"][0]["message"]["content"]
+        except (KeyError, IndexError) as e:
+            raise ValueError(
+                f"Failed to parse OpenAI response: {e}. Response: {res_json}"
+            )
+        usage = res_json.get("usage", {})
+        input_tokens = usage.get("prompt_tokens", len(user) // 4)
+        output_tokens = usage.get("completion_tokens", len(text) // 4)
         self.calls += 1
         self._last_usage = Usage(input_tokens, output_tokens)
         self.total_tokens += input_tokens + output_tokens
@@ -108,7 +145,7 @@ class GeminiLLM(LLMBase):
 
 
 class OpenRouterLLM(LLMBase):
-    """Боевой клиент OpenRouter через HTTP API."""
+    """OpenRouter client via OpenAI-compatible chat completions endpoint."""
 
     def __init__(self, model: str | None = None, api_key: str | None = None):
         model_name = model or os.getenv("DOCGEN_MODEL") or "anthropic/claude-3.5-sonnet:beta"
@@ -122,32 +159,30 @@ class OpenRouterLLM(LLMBase):
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
-            "HTTP-Referer": "https://github.com/google-deepmind/antigravity",
+            "HTTP-Referer": "https://github.com/hackathon-task1/project-doc-generator",
             "X-Title": "Project Documentation Generator",
         }
         payload = {
             "model": self.model,
             "messages": [
                 {"role": "system", "content": system},
-                {"role": "user", "content": user}
+                {"role": "user", "content": user},
             ],
             "temperature": 0,
             "max_tokens": max_tokens,
         }
-        
         resp = requests.post(url, json=payload, headers=headers)
         resp.raise_for_status()
         res_json = resp.json()
-        
         try:
             text = res_json["choices"][0]["message"]["content"]
         except (KeyError, IndexError) as e:
-            raise ValueError(f"Failed to parse OpenRouter response: {e}. Response: {res_json}")
-            
+            raise ValueError(
+                f"Failed to parse OpenRouter response: {e}. Response: {res_json}"
+            )
         usage = res_json.get("usage", {})
         input_tokens = usage.get("prompt_tokens", len(user) // 4)
         output_tokens = usage.get("completion_tokens", len(text) // 4)
-        
         self.calls += 1
         self._last_usage = Usage(input_tokens, output_tokens)
         self.total_tokens += input_tokens + output_tokens
@@ -155,14 +190,13 @@ class OpenRouterLLM(LLMBase):
 
 
 class FakeLLM(LLMBase):
-    """Заглушка без сети. Грубо «извлекает» факты регулярками из промпта."""
+    """Offline stub. Uses regex heuristics — no network required."""
 
     def __init__(self, model: str | None = None):
         super().__init__(model=(model or "fake-offline-model"))
 
     def complete(self, system: str, user: str, max_tokens: int = 4096) -> str:
         self.calls += 1
-        # грубая оценка токенов: ~4 символа на токен
         self._last_usage = Usage(len(user) // 4, 200)
         self.total_tokens += self._last_usage.input_tokens + self._last_usage.output_tokens
 
@@ -170,10 +204,11 @@ class FakeLLM(LLMBase):
             return json.dumps(self._fake_extract(user), ensure_ascii=False)
         return json.dumps(self._fake_synthesize(user), ensure_ascii=False)
 
-    # --- очень простая эвристика, только для демонстрации/тестов ---
     def _fake_extract(self, user: str) -> dict:
         facts = []
-        for fname, body in re.findall(r'<file name="([^"]+)"[^>]*>\n(.*?)\n</file>', user, re.DOTALL):
+        for fname, body in re.findall(
+            r'<file name="([^"]+)"[^>]*>\n(.*?)\n</file>', user, re.DOTALL
+        ):
             for line in body.splitlines():
                 s = line.strip(" -*\t")
                 if not s:
@@ -196,7 +231,7 @@ class FakeLLM(LLMBase):
         return {"facts": facts[:50], "conflicts": []}
 
     def _fake_synthesize(self, user: str) -> dict:
-        from .jsonutil import extract_json  # первый сбалансированный {...} = блок фактов
+        from .jsonutil import extract_json
 
         facts = []
         try:
@@ -225,44 +260,77 @@ class FakeLLM(LLMBase):
         return {"document": doc, "resolution_notes": []}
 
 
+def _is_gemini_model(model: str) -> bool:
+    """Return True only for models that explicitly identify as Gemini."""
+    return model.startswith("gemini-") or model.startswith("gemini/")
+
+
+def _is_openai_model(model: str) -> bool:
+    """Return True for models that explicitly identify as OpenAI."""
+    return (
+        model.startswith("gpt-")
+        or model.startswith("o1-")
+        or model.startswith("o3-")
+        or model.startswith("o4-")
+        or model in ("gpt-4o", "gpt-4", "gpt-3.5-turbo")
+    )
+
+
 def make_llm(
     model: str | None = None,
     openrouter_key: str | None = None,
     anthropic_key: str | None = None,
-    gemini_key: str | None = None
+    gemini_key: str | None = None,
+    openai_key: str | None = None,
 ) -> LLMBase:
     if os.getenv("DOCGEN_FAKE") == "1":
         return FakeLLM(model)
-        
+
     selected_model = model or os.getenv("DOCGEN_MODEL", "")
-    
-    # Ключи API (переданные аргументы имеют приоритет над переменными окружения)
+
     openrouter_key = openrouter_key or os.getenv("OPENROUTER_API_KEY")
     anthropic_key = anthropic_key or os.getenv("ANTHROPIC_API_KEY")
     gemini_key = gemini_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-    
-    # 1. Если задан ключ OpenRouter
+    openai_key = openai_key or os.getenv("OPENAI_API_KEY")
+
+    # 1. OpenAI direct — when an OpenAI key is present and model is OpenAI-style (or unset)
+    if openai_key and (not selected_model or _is_openai_model(selected_model)):
+        return OpenAILLM(selected_model or "gpt-4o", openai_key)
+
+    # 2. OpenRouter — model must include "/" for provider/model routing
     if openrouter_key:
-        model_name = selected_model if "/" in selected_model else "anthropic/claude-3.5-sonnet:beta"
+        if selected_model and "/" not in selected_model:
+            logger.warning(
+                "OpenRouter requires a provider-prefixed model (e.g. 'openai/gpt-4o'). "
+                "Got '%s' — defaulting to 'anthropic/claude-3.5-sonnet:beta'.",
+                selected_model,
+            )
+            model_name = "anthropic/claude-3.5-sonnet:beta"
+        else:
+            model_name = selected_model or "anthropic/claude-3.5-sonnet:beta"
         return OpenRouterLLM(model_name, openrouter_key)
-        
-    # 2. Если явно выбрана модель gemini
-    if selected_model.startswith("gemini") or "flash" in selected_model or "pro" in selected_model:
-        if gemini_key:
-            return GeminiLLM(selected_model, gemini_key)
-            
-    # 3. Если есть ключ Anthropic
+
+    # 3. Gemini — only when the model name explicitly identifies as Gemini
+    if _is_gemini_model(selected_model) and gemini_key:
+        return GeminiLLM(selected_model, gemini_key)
+
+    # 4. Anthropic key
     if anthropic_key:
         try:
             return AnthropicLLM(selected_model, anthropic_key)
-        except Exception:
-            pass
-            
-    # 4. Если есть ключ Gemini
+        except Exception as exc:
+            logger.warning("AnthropicLLM init failed: %s", exc)
+
+    # 5. Gemini fallback (Gemini key present, no other key matched)
     if gemini_key:
         try:
             return GeminiLLM(selected_model or "gemini-2.5-flash", gemini_key)
-        except Exception:
-            pass
-            
+        except Exception as exc:
+            logger.warning("GeminiLLM init failed: %s", exc)
+
+    logger.warning(
+        "No valid API key found for model '%s'. Falling back to FakeLLM — "
+        "output will be deterministic placeholder data, not a real LLM response.",
+        selected_model,
+    )
     return FakeLLM(model)

@@ -34,12 +34,11 @@ class InputFile(BaseModel):
 
 class GenerateRequest(BaseModel):
     files: List[InputFile] = Field(default_factory=list)
-    # Необязательное переопределение модели для конкретного запроса.
     model: str | None = None
-    # Опциональные ключи API для гибкости UI
     openrouter_api_key: str | None = None
     anthropic_api_key: str | None = None
     gemini_api_key: str | None = None
+    openai_api_key: str | None = None
 
 
 class Document(BaseModel):
@@ -76,6 +75,7 @@ class ConfigSettings(BaseModel):
     openrouter_api_key: str | None = None
     anthropic_api_key: str | None = None
     gemini_api_key: str | None = None
+    openai_api_key: str | None = None
 
 
 def coerce_document(raw: Dict[str, Any] | None) -> Document:
